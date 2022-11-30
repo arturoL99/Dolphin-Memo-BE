@@ -1,0 +1,32 @@
+stages:          # List of stages for jobs, and their order of execution
+  - build
+  - test
+  - deploy
+
+build:       # This job runs in the build stage, which runs first.
+  stage: build
+  image: node:latest
+  script:
+    - echo "Node compile started"
+    - "npm install"
+
+  artifacts:      
+    paths:
+      - build
+      - node_modules/
+
+test:   # This job runs in the test stage.
+  stage: test         # It only starts when the job in the build stage completes successfully.
+  image: node:latest
+  script:
+    - echo "Node test started"
+    - npm test
+
+deploy: # This job runs in the deploy stage.
+  stage: deploy
+  image: ruby:latest
+  script:
+    - gem install dpl
+    - dpl --provider=heroku --app=$HEROKU_APP_NAME --api_key=$HEROKU_API_KEY
+  only :
+    - gameStarted
